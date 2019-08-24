@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <title>Geo Informatics for GenZ</title>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.4.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+  <style>
+    #map_canvas { 
+      height:100%;
+    }
+    @media screen and (min-width: 601px) {
+      #map_canvas { 
+        width:700px;
+        height:400px;
+      }
+    }
+    @media screen and (max-width: 600px) {
+      #map_canvas { 
+        width:300px;
+        height:300px;
+      }
+    }
+    html, body {
+      height: 100%;
+      margin: 0;
+      padding: 0;
+    }
+  </style>
+</head>
+<body>
+
+<div class="jumbotron text-center" style="margin-bottom:0">
+  <h3>โครงการฝึกอบรมเชิงปฏิบัติการ</h3>
+  <h5>Geo Informatics for GenZ</h5> 
+</div>
+
+<nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+  <a class="navbar-brand" href="#">หน้าหลัก</a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+  <div class="collapse navbar-collapse" id="collapsibleNavbar">
+    <ul class="navbar-nav">
+      <li class="nav-item">
+        <a class="nav-link" href="#">ลิงก์1</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">ลิงก์2</a>
+      </li>
+      <li class="nav-item">
+        <a class="nav-link" href="#">ลิงก์3</a>
+      </li>    
+    </ul>
+  </div>  
+</nav>
+
+<div class="container" style="margin-top:30px">
+    <div class="col-sm-12">
+      <h5>แจ้งข้อมูลน้ำท่วมในพื้นที่ที่เกิดน้ำท่วม...</h5>
+        <div class="col-sm-8">
+           <form name="addfile" action="getdataform.php"  method="post" enctype="multipart/form-data">
+            <div class="form-group">
+              <label for="usr"><b>ชื่อ-นามสกุล ผู้แจ้ง:</b></label>
+              <input type="text" name="fullname" class="form-control" id="fullname">
+            </div>
+            <div class="form-group">
+              <label for="usr"><b>เบอร์โทรศัพท์ติดต่อ:</b></label>
+              <input type="text" name="tel" class="form-control" id="tel">
+            </div>
+            <label for="usr"><b>ตำแหน่งปัจจุบันของคุณ:</b></label>
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="lat">ละติจูด (Latitude)</label>
+                  <input name="lat_value" type="text" id="lat_value" value="0">
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="lon">ลองจิจูด (Longitude)</label>
+                  <input name="lon_value" type="text" id="lon_value" value="0" >
+                </div>
+              </div>
+            </div>
+            <hr>
+            <label for="usr"><b>เพิ่มตำแหน่งของพื้นที่น้ำท่วม (เพิ่มเติม):</b></label>
+            <div class="row">
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label for="latitude">ชื่อสถานที่(เช่น นามแฝง,สถานที่ใกล้เคียง)</label>
+                  <input name="name_place" type="text" class="form-control" id="name_place">
+                </div>
+              </div>
+              <div class="col-sm-6">
+                <div class="form-group">
+                  <label for="level_wt">ระดับน้ำ (หน่วย=เมตร)</label>
+                  <input name="level_wt" type="text" class="form-control col-sm-4" id="level_wt">
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="latitude">ละติจูด (Latitude)</label>
+                  <input name="latitude" type="text" class="form-control" id="latitude">
+                </div>
+              </div>
+              <div class="col-sm-4">
+                <div class="form-group">
+                  <label for="longitude">ลองจิจูด (Longitude)</label>
+                  <input name="longitude" type="text" class="form-control" id="longitude">
+                </div>
+              </div>
+            </div>
+            <hr>
+
+            <div class="form-group">
+              <div id="map_canvas"></div>
+            </div>
+
+            <div class="form-group">
+              <label for="pwd"><b>อัพโหลดรูปภาพ:</b></label>
+              <input type="file" name="image" id="image" />
+            </div>
+
+            <div class="form-group">
+              <center><input type="submit" class="btn btn-info btn-lg btn-primary" value="บันทึก"></center>
+            </div>
+          </form>
+        </div>
+      <hr>
+      <b>ตารางพื้นที่น้ำท่วม</b>
+        <table class="table table-striped">
+          <thead>
+              <tr class="">
+                  <th id="">ชื่อสถานที่</th>
+                  <th id="">รูปภาพ</th>
+                  <th id="">ละติจูด</th>
+                  <th id="">ลองจิจูด</th>
+                  <th id="">ระดับน้ำ</th>
+              </tr>
+          </thead>
+          <tbody id="placeData">
+          </tbody>
+        </table>
+    </div>
+</div>
+
+<div class="jumbotron text-center" style="margin-bottom:0;">
+  <p>@2019</p>
+</div>
+
+<script src="js/server.js"></script>
+<script type="text/javascript">
+var latlng;
+var markers = [];
+var objJSON =[];
+var info; // กำหนดตัวแปร info ได้สำหรับเรียก infowindow 
+var map; // กำหนดตัวแปร map ไว้ด้านนอกฟังก์ชัน เพื่อให้สามารถเรียกใช้งาน จากส่วนอื่นได้
+var GGM; // กำหนดตัวแปร GGM ไว้เก็บ google.maps Object จะได้เรียกใช้งานได้ง่ายขึ้น
+
+  function initialize() { // ฟังก์ชันแสดงแผนที่
+      GGM=new Object(google.maps); // เก็บตัวแปร google.maps Object ไว้ในตัวแปร GGM
+      // กำหนดจุดเริ่มต้นของแผนที่
+      var my_Latlng  = new GGM.LatLng(7.008738, 100.474453);
+      var my_mapTypeId=GGM.MapTypeId.ROADMAP; // กำหนดรูปแบบแผนที่ที่แสดง
+      // กำหนด DOM object ที่จะเอาแผนที่ไปแสดง ที่นี้คือ div id=map_canvas
+      var my_DivObj=$("#map_canvas")[0]; 
+
+      info = new google.maps.InfoWindow(); 
+      
+      // กำหนด Option ของแผนที่
+      var myOptions = {
+          zoom: 14, // กำหนดขนาดการ zoom
+          center: my_Latlng , // กำหนดจุดกึ่งกลาง
+          mapTypeId:my_mapTypeId // กำหนดรูปแบบแผนที่
+      };
+      map = new GGM.Map(my_DivObj,myOptions);// สร้างแผนที่และเก็บตัวแปรไว้ในชื่อ map
+   
+      // เรียกใช้คุณสมบัติ ระบุตำแหน่ง
+      if(navigator.geolocation){
+              navigator.geolocation.getCurrentPosition(function(position){
+                  var pos = new GGM.LatLng(position.coords.latitude,position.coords.longitude);
+                  var infowindow = new GGM.InfoWindow({
+                      map: map,
+                      position: pos,
+                      content: 'ตำแหน่งปัจจุบันของคุณ!'
+                  });
+                   
+                  var my_Point = infowindow.getPosition();  // หาตำแหน่งของตัว marker เมื่อกดลากแล้วปล่อย
+                  map.panTo(my_Point);  // ให้แผนที่แสดงไปที่ตัว marker       
+                  $("#lat_value").val(my_Point.lat());  // เอาค่า latitude ตัว marker แสดงใน textbox id=lat_value
+                  $("#lon_value").val(my_Point.lng()); // เอาค่า longitude ตัว marker แสดงใน textbox id=lon_value             
+                  map.setCenter(pos);
+              },function() {
+                  // คำสั่งทำงาน ถ้า ระบบระบุตำแหน่ง geolocation ผิดพลาด หรือไม่ทำงาน
+              });
+      }else{
+           // คำสั่งทำงาน ถ้า บราวเซอร์ ไม่สนับสนุน ระบุตำแหน่ง
+      }
+
+    $(document).ready(function(){
+      MarkerAll(); // คำสั่งเรียกฟังก์ชัน MarkerAll
+
+       var url = "http://localhost/geo-map/php/showimg.php";
+            console.log("url:",url); 
+
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: url,
+                success: function(result){
+                  var itemsp = '';
+                  console.log("result",result);
+                  $.each(result, function(i, item){ // loop..
+                    
+                    if(item.latitude){
+                    var htmlTr = "<tr>"+
+                                  "<td style=\"width:20%;\">"+ item.name_place+ "</td>"+
+                                  "<td style=\"width:30%;\">"+"<img style=\"width:20%;\" src=\""+ item.locator_img +"\" >"+"</td>"+
+                                  "<td style=\"width:20%;\">"+ item.latitude+ "</td>"+
+                                  "<td style=\"width:20%;\">" +item.longitude+  "</td>"+
+                                   "<td style=\"width:40%;\">" +item.level_wt+  "</td>"+
+                                  "</tr>"
+                    }else{
+                      var htmlTr = "<tr>"+
+                                  "<td style=\"width:20%;\">"+ item.name_place+ "</td>"+
+                                  "<td style=\"width:30%;\">"+"<img style=\"width:20%;\" src=\""+ item.locator_img +"\" >"+"</td>"+
+                                  "<td style=\"width:20%;\">"+ item.lat_curr+ "</td>"+
+                                  "<td style=\"width:20%;\">" +item.log_curr+  "</td>"+
+                                  "<td style=\"width:40%;\">" +item.level_wt+  "</td>"+
+                                  "</tr>"
+                    }
+                    
+                    $("#placeData").append(htmlTr);            
+                    
+                }); 
+            }
+          });
+
+    });
+
+      function MarkerAll(){
+            var url = "http://localhost/geo-map/php/genmarker_all.php";
+            $.ajax({
+                type: "POST",
+                dataType: "json",
+                url: url,
+                success: function(result){
+                    $.each(result, function(i, item){ // loop.
+                        
+                    var name_place = item.name_place;  
+                    var latitude = item.latitude;
+                    var longitude = item.longitude;
+
+                    latlng1 = new google.maps.LatLng(item.lat_curr,item.log_curr); //เก็บตำแหน่ง latitude และ longitude
+
+                    latlng = new google.maps.LatLng(item.latitude,item.longitude); //เก็บตำแหน่ง latitude และ longitude
+
+                    if(item.latitude){
+                        var contents = '';     
+                        var contentStr = contents 
+                                    +'<p style=\"font-size:16px;\">'+item.name_place+'</p>'
+                                    +'<p style=\"font-size:14px;\">'+item.latitude+','+item.longitude+'</p>';
+
+                        var marker = new google.maps.Marker({
+                            position: latlng,
+                            map: map,
+                        });
+                      
+                      google.maps.event.addListener(marker, 'click', (function(marker, i){
+                        return function() {
+                          info.setContent(contentStr);
+                          info.open(map,marker);
+                        }
+                      })(marker, i));
+
+                    }else if(item.lat_curr){
+                      var contents = '';     
+                      var contentStr = contents 
+                                  +'<p style=\"font-size:16px;\">'+item.name_place+'</p>'
+                                  +'<p style=\"font-size:14px;\">'+item.lat_curr+','+item.log_curr+'</p>';
+
+                      var marker1 = new google.maps.Marker({
+                          position: latlng1,
+                          map: map,
+                      });
+                    
+                      google.maps.event.addListener(marker1, 'click', (function(marker, i){
+                        return function() {
+                          info.setContent(contentStr);
+                          info.open(map,marker1);
+                        }
+                      })(marker1, i));
+                    }
+                  }); // loop each
+                } //success
+              }); //ajax
+            }//end MarkerAll
+    }
+
+</script> 
+<script async defer
+    src="https://maps.googleapis.com/maps/api/js?key=API_KEY&callback=initialize">
+</script> 
+</body>
+</html>
